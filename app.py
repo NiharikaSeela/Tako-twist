@@ -5,13 +5,13 @@ from openvino.runtime import Core
 
 # Load OpenVINO models
 ie = Core()
-face_detection_model = ie.read_model(model="models/face-detection-adas-0001.xml")
+face_detection_model = ie.read_model(model="face-detection-adas-0001.xml")
 face_detection_compiled = ie.compile_model(face_detection_model, device_name="CPU")
 
-emotions_model = ie.read_model(model="models/emotions-recognition-retail-0003.xml")
+emotions_model = ie.read_model(model="emotions-recognition-retail-0003.xml")
 emotions_compiled = ie.compile_model(emotions_model, device_name="CPU")
 
-face_reid_model = ie.read_model(model="models/face-reidentification-retail-0095.xml")
+face_reid_model = ie.read_model(model="face-reidentification-retail-0095.xml")
 face_reid_compiled = ie.compile_model(face_reid_model, device_name="CPU")
 
 # Helper function for face detection
@@ -109,11 +109,17 @@ with tab1:
             # Extract the face region from the uploaded image
             face_detected = img[boxes[0][1]:boxes[0][3], boxes[0][0]:boxes[0][2]]
             
+            # Check face size for debug
+            st.write(f"Detected face size: {face_detected.shape}")
+            
             # Compare the detected face with the known face
             distance = compare_faces(face_detected, known_face_rgb)
             
-            # Set a lower threshold for better accuracy
-            if distance < 0.3:  # Threshold for face recognition
+            # Debug: print distance
+            st.write(f"Distance: {distance:.4f}")
+            
+            # Set a much lower threshold for better accuracy
+            if distance < 0.2:  # Threshold for face recognition
                 st.success("Face recognised! Welcome, User!")
             else:
                 st.error(f"Face not recognised! (Distance: {distance:.4f})")
