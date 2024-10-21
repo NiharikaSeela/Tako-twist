@@ -102,14 +102,14 @@ with tab1:
             img_rgb_boxed = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             st.image(img_rgb_boxed, caption="Detected Face", use_column_width=True)
             
-            # Load the known face image
+            # Load the known face image from the library
             known_face = cv2.imread("known_faces/known_faces.png")
             known_face_rgb = cv2.cvtColor(known_face, cv2.COLOR_BGR2RGB)
             
             # Extract the face region from the uploaded image
             face_detected = img[boxes[0][1]:boxes[0][3], boxes[0][0]:boxes[0][2]]
             
-            # Check face size for debug
+            # Ensure the face size is appropriate
             st.write(f"Detected face size: {face_detected.shape}")
             
             # Compare the detected face with the known face
@@ -118,12 +118,9 @@ with tab1:
             # Debug: print distance
             st.write(f"Distance: {distance:.4f}")
             
-            # Define stricter thresholds for "Face not recognised!"
-            # Using 0.15 for a strict match, and 0.25 for a weaker, but acceptable match
-            if distance < 0.15:
+            # Set a stricter threshold to only recognize the registered user
+            if distance < 0.25:
                 st.success("Face recognised! Welcome, User!")
-            elif distance < 0.25:
-                st.warning("Face partially recognized, but confidence is low.")
             else:
                 st.error(f"Face not recognised! (Distance: {distance:.4f})")
 
@@ -158,4 +155,3 @@ with tab2:
                 detected_emotion = recognize_emotions(img, boxes[0])
                 st.write("Thank you for your feedback!")
                 st.write(f"Emotion detected: {detected_emotion}")
-
