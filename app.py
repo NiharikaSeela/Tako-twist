@@ -129,7 +129,7 @@ with tab1:
                     st.error(f"Face not recognised! (Distance: {distance:.4f})")
             else:
                 # **STEP 4: Reject if face shape doesn't match**
-                st.error(f"User not recognised! Detected face shape: {detected_face_shape} doesn't match the known face shape.")
+                st.error("User not recognised!")
 
 # Feedback Tab
 with tab2:
