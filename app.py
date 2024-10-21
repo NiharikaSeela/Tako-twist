@@ -184,4 +184,4 @@ with tab2:
                 st.write("Thank you for your feedback!")
                 st.write(f"Emotion detected: {detected_emotion}")
             else:
-                st.error("No faces detected in the photo.")
+                st.error("No faces detected in the photo.") 
