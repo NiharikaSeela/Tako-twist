@@ -132,26 +132,32 @@ with tab1:
                 st.error("User not recognised!")
 
 # Feedback Tab
+SAVE_FOLDER = "feedback_photos"
+if not os.path.exists(SAVE_FOLDER):
+    os.makedirs(SAVE_FOLDER)
+
 # Feedback Tab
 with tab2:
     st.header("Feedback")
     feedback = st.selectbox("How was your experience today?", ["Good", "Poor", "Excellent"])
     
     if st.button("Submit Feedback"):
-        # Start camera and take picture
+        # Start camera and take a picture
         picture = st.camera_input("Take a picture")
         
         if picture:
-            # Read the captured photo as bytes
-            img_bytes = picture.getvalue()
-            # Convert bytes to numpy array
-            img = np.frombuffer(img_bytes, np.uint8)
-            # Decode image
-            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+            # Save the captured photo to a file
+            photo_path = os.path.join(SAVE_FOLDER, "captured_photo.jpg")
+            with open(photo_path, "wb") as f:
+                f.write(picture.getvalue())
+            
+            # Read the saved photo
+            img = cv2.imread(photo_path)
             
             # Convert BGR to RGB for display
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+            st.image(img_rgb, caption="Captured Photo", use_column_width=True)
+            
             # Detect faces in the captured photo using 'face-detection-adas-0001.xml'
             boxes = detect_faces(img)
             
@@ -160,8 +166,10 @@ with tab2:
                 for box in boxes:
                     xmin, ymin, xmax, ymax = box
                     cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                
+                # Convert the image to RGB and display the photo with bounding boxes
                 img_rgb_boxed = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                st.image(img_rgb_boxed, caption="Detected Face(s)", use_column_width=True)
+                st.image(img_rgb_boxed, caption="Face(s) Detected", use_column_width=True)
                 
                 # Assuming there's at least one face, take the first detected face
                 face_box = boxes[0]
