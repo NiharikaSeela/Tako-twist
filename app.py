@@ -5,13 +5,13 @@ from openvino.runtime import Core
 
 # Load OpenVINO models
 ie = Core()
-face_detection_model = ie.read_model(model="face-detection-adas-0001.xml")
+face_detection_model = ie.read_model(model="models/face-detection-adas-0001.xml")
 face_detection_compiled = ie.compile_model(face_detection_model, device_name="CPU")
 
-emotions_model = ie.read_model(model="emotions-recognition-retail-0003.xml")
+emotions_model = ie.read_model(model="models/emotions-recognition-retail-0003.xml")
 emotions_compiled = ie.compile_model(emotions_model, device_name="CPU")
 
-face_reid_model = ie.read_model(model="face-reidentification-retail-0095.xml")
+face_reid_model = ie.read_model(model="models/face-reidentification-retail-0095.xml")
 face_reid_compiled = ie.compile_model(face_reid_model, device_name="CPU")
 
 # Helper function for face detection
