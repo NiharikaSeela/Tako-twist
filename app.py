@@ -5,13 +5,13 @@ from openvino.runtime import Core
 
 # Load OpenVINO models
 ie = Core()
-face_detection_model = ie.read_model(model="models/face-detection-adas-0001.xml")
+face_detection_model = ie.read_model(model="face-detection-adas-0001.xml")
 face_detection_compiled = ie.compile_model(face_detection_model, device_name="CPU")
 
-emotions_model = ie.read_model(model="models/emotions-recognition-retail-0003.xml")
+emotions_model = ie.read_model(model="emotions-recognition-retail-0003.xml")
 emotions_compiled = ie.compile_model(emotions_model, device_name="CPU")
 
-face_reid_model = ie.read_model(model="models/face-reidentification-retail-0095.xml")
+face_reid_model = ie.read_model(model="face-reidentification-retail-0095.xml")
 face_reid_compiled = ie.compile_model(face_reid_model, device_name="CPU")
 
 # Helper function for face detection
@@ -63,9 +63,9 @@ def compare_faces(input_face, known_face):
     input_embedding = face_reid_compiled([input_blob])[face_reid_compiled.output(0)]
     known_embedding = face_reid_compiled([known_blob])[face_reid_compiled.output(0)]
     
-    # Normalize embeddings to unit vectors
-    input_embedding = input_embedding / np.linalg.norm(input_embedding)
-    known_embedding = known_embedding / np.linalg.norm(known_embedding)
+    # Normalize embeddings using cv2.normalize
+    input_embedding = cv2.normalize(input_embedding, None, alpha=0, beta=1, norm_type=cv2.NORM_L2)
+    known_embedding = cv2.normalize(known_embedding, None, alpha=0, beta=1, norm_type=cv2.NORM_L2)
     
     # Compute Euclidean distance between the embeddings
     distance = np.linalg.norm(input_embedding - known_embedding)
@@ -118,8 +118,8 @@ with tab1:
             # Debug: print distance
             st.write(f"Distance: {distance:.4f}")
             
-            # Set a much lower threshold for better accuracy
-            if distance < 0.2:  # Threshold for face recognition
+            # Set a lower threshold for better accuracy
+            if distance < 0.15:  # Threshold for face recognition
                 st.success("Face recognised! Welcome, User!")
             else:
                 st.error(f"Face not recognised! (Distance: {distance:.4f})")
