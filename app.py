@@ -14,6 +14,9 @@ emotions_compiled = ie.compile_model(emotions_model, device_name="CPU")
 face_reid_model = ie.read_model(model="models/face-reidentification-retail-0095.xml")
 face_reid_compiled = ie.compile_model(face_reid_model, device_name="CPU")
 
+# Known face shape (the known user's face shape stored in the known_faces/known_faces.png)
+KNOWN_FACE_SHAPE = (318, 242, 3)  # Example shape (height, width, channels)
+
 # Helper function for face detection
 def detect_faces(image):
     height, width = image.shape[:2]
@@ -102,27 +105,31 @@ with tab1:
             img_rgb_boxed = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             st.image(img_rgb_boxed, caption="Detected Face", use_column_width=True)
             
-            # Load the known face image from the library
-            known_face = cv2.imread("known_faces/known_faces.png")
-            known_face_rgb = cv2.cvtColor(known_face, cv2.COLOR_BGR2RGB)
-            
             # Extract the face region from the uploaded image
-            face_detected = img[boxes[0][1]:boxes[0][3], boxes[0][0]:boxes[0][2]]
-            
-            # Ensure the face size is appropriate
-            st.write(f"Detected face size: {face_detected.shape}")
-            
-            # Compare the detected face with the known face
-            distance = compare_faces(face_detected, known_face_rgb)
-            
-            # Debug: print distance
-            st.write(f"Distance: {distance:.4f}")
-            
-            # Set a stricter threshold to only recognize the registered user
-            if distance < 0.25:
-                st.success("Face recognised! Welcome, User!")
+            detected_face = img[boxes[0][1]:boxes[0][3], boxes[0][0]:boxes[0][2]]
+            detected_face_shape = detected_face.shape
+            st.write(f"Detected face shape: {detected_face_shape}")
+
+            # **STEP 1: Check if the face shape matches the known user's face shape**
+            if detected_face_shape == KNOWN_FACE_SHAPE:
+                # Load the known face image from the library
+                known_face = cv2.imread("known_faces/known_faces.png")
+                known_face_rgb = cv2.cvtColor(known_face, cv2.COLOR_BGR2RGB)
+                
+                # **STEP 2: Compare the face embeddings**
+                distance = compare_faces(detected_face, known_face_rgb)
+                
+                # Debug: print distance
+                st.write(f"Distance: {distance:.4f}")
+                
+                # **STEP 3: Use a strict distance threshold**
+                if distance < 0.25:
+                    st.success("Face recognised! Welcome, User!")
+                else:
+                    st.error(f"Face not recognised! (Distance: {distance:.4f})")
             else:
-                st.error(f"Face not recognised! (Distance: {distance:.4f})")
+                # **STEP 4: Reject if face shape doesn't match**
+                st.error(f"User not recognised! Detected face shape: {detected_face_shape} doesn't match the known face shape.")
 
 # Feedback Tab
 with tab2:
