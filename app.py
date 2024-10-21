@@ -132,6 +132,7 @@ with tab1:
                 st.error("User not recognised!")
 
 # Feedback Tab
+# Feedback Tab
 with tab2:
     st.header("Feedback")
     feedback = st.selectbox("How was your experience today?", ["Good", "Poor", "Excellent"])
@@ -141,24 +142,37 @@ with tab2:
         picture = st.camera_input("Take a picture")
         
         if picture:
-            img = np.array(bytearray(picture.read()), dtype=np.uint8)
-            img = cv2.imdecode(img, 1)
+            # Read the captured photo as bytes
+            img_bytes = picture.getvalue()
+            # Convert bytes to numpy array
+            img = np.frombuffer(img_bytes, np.uint8)
+            # Decode image
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
             
-            # Convert BGR to RGB
+            # Convert BGR to RGB for display
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            
-            # Detect faces in the captured photo
+
+            # Detect faces in the captured photo using 'face-detection-adas-0001.xml'
             boxes = detect_faces(img)
             
             if boxes:
-                # Draw bounding boxes around the detected face
+                # Draw bounding boxes around the detected faces
                 for box in boxes:
                     xmin, ymin, xmax, ymax = box
                     cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
                 img_rgb_boxed = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                st.image(img_rgb_boxed, caption="Detected Face", use_column_width=True)
+                st.image(img_rgb_boxed, caption="Detected Face(s)", use_column_width=True)
                 
-                # Recognize the emotion of the detected face
-                detected_emotion = recognize_emotions(img, boxes[0])
+                # Assuming there's at least one face, take the first detected face
+                face_box = boxes[0]
+                xmin, ymin, xmax, ymax = face_box
+                face = img[ymin:ymax, xmin:xmax]
+                
+                # **STEP 1: Use 'emotions-recognition-retail-0003.xml' to process the face**
+                detected_emotion = recognize_emotions(img, face_box)
+                
+                # **STEP 2: Display the emotion detected**
                 st.write("Thank you for your feedback!")
                 st.write(f"Emotion detected: {detected_emotion}")
+            else:
+                st.error("No faces detected in the photo.")
